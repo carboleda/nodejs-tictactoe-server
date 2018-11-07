@@ -1,5 +1,6 @@
 module.exports = {
     GAME_SIZE: 3,
+    UNSELECTED_POSITION: '  ',
     GAMER_CHAR: {
         GAMER1_CURSOR: '⦿',
         GAMER1_MARK: 'O',

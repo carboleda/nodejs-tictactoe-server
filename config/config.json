@@ -1,5 +1,7 @@
 {
-    "server": "http://localhost:3000",
+    "server": {
+        "port": 3000
+    },
     "board": {
         "chars": {
             "top": "═", "top-mid": "╤", "top-left": "╔", "top-right": "╗"

@@ -1,53 +1,50 @@
-var app = require('express')();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-let game;
-let gamerCount = 0;
-let gamers = {
-    1: null,
-    2: null
-};
-
-function getGamerPlace() {
-    return Object.keys(gamers).find(place => gamers[place] === null);
-}
-
-function resetGame() {
-    game = ['  ', '  ', '  ', '  ', '  ', '  ', '  ', '  ', '  '];
-}
+const dockerNames = require('docker-names');
+const config = require('./config/config.json');
+const Match = require('./src/modules/match');
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+const ACTIVE_MATCHES = {};
 
 io.on('connection', function (client) {
-    const gamerPlace = getGamerPlace();
-    if(gamerPlace) {
-        gamerCount++;
-        gamers[gamerPlace] = gamerCount;
-        client.gamerPlace = gamerPlace;
-        console.log(`Current connections ${gamerCount}`);
-        console.log(`New gamer connected, gamerPlace ${gamerPlace}`);
-        client.emit('init', {
-            boardData: game,
-            unselectedPosition: '  ',
-            number: gamerPlace
-        });
+    client.on('new match', function ({ nickName }) {
+        const matchName = dockerNames.getRandomName();
+        const mMatch = new Match(matchName, io);
+        client.nickName = nickName;
+        client.matchName = matchName;
+        mMatch.joinPlayer(client);
+        ACTIVE_MATCHES[matchName] = mMatch;
+    });
 
-        client.on('position marked', function (currentGame) {
-            game = currentGame;
-            console.log('MOVE:game', game);
-            client.broadcast.emit('position marked', game);
-            //server.emit('move', game);
-        });
+    client.on('join to match', function ({ nickName, matchName }) {
+        client.nickName = nickName;
+        client.matchName = matchName;
+        ACTIVE_MATCHES[matchName].joinPlayer(client);
+    });
 
-        client.on('disconnect', function () {
-            console.log('client.gamerPlace', client.gamerPlace)
-            gamerCount--;
-            gamers[client.gamerPlace] = null;
-            resetGame();
-            server.emit('position marked', game);
-        });
-    } else {
-        client.emit('game full');
-    }
+    client.on('get available matches', () => {
+        const matches = Object.keys(ACTIVE_MATCHES)
+            .filter(matchName => ACTIVE_MATCHES[matchName].hasAvailablePlace() == true);
+        client.emit('receive available matches', matches);
+    });
+
+    client.on('disconnect', () => {
+        console.log('playerSocket.playerPlace', client.playerPlace);
+        if(client.matchName) {
+            const match = ACTIVE_MATCHES[client.matchName];
+            match.playerCount--;
+            match.players[client.playerPlace] = null;
+            if(match.playerCount == 0) {
+                console.log('destroy match', client.matchName);
+                delete ACTIVE_MATCHES[client.matchName];
+            } else {
+                match.resetGame();
+                io.emit('position marked', match.gameBoard);
+            }
+        }
+    });
 });
-server.listen(3000);
 
-resetGame();
+server.listen(config.server.port, () => {
+    console.log(`Server is listen on port ${config.server.port}`);
+});
