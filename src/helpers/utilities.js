@@ -16,7 +16,7 @@ function stripColors(str) {
     return str.replace(/\x1B\[\d+m/g, '');
 }
 
-function getCursors(cursors) {
+function getPlayerCursors(cursors) {
     const normal = Object.keys(cursors)
         .filter(key => key.indexOf('_CURSOR') !== -1)
         .map(key => cursors[key]);
@@ -24,12 +24,20 @@ function getCursors(cursors) {
     return [ ...normal, ...colors ];
 }
 
-function getMarkers(markers) {
+function getPlayerCursor(cursors, plyerPlace) {
+    return cursors[`GAMER${plyerPlace}_CURSOR`];
+}
+
+function getPlayerMarkers(markers) {
     const normal = Object.keys(markers)
         .filter(key => key.indexOf('_MARK') !== -1)
         .map(key => markers[key]);
     const colors = normal.map(item => item.bold.yellow);
     return [ ...normal, ...colors ];
+}
+
+function getPlayerMarker(markers, plyerPlace) {
+    return markers[`GAMER${plyerPlace}_MARK`];
 }
 
 /*const matrix = arrayToMatrix([0,0,1,0,0,2,0,0,3], 3);
@@ -40,6 +48,8 @@ module.exports = {
     arrayToMatrix,
     matrixToArray,
     stripColors,
-    getCursors,
-    getMarkers
+    getPlayerCursors,
+    getPlayerCursor,
+    getPlayerMarkers,
+    getPlayerMarker,
 };

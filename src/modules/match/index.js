@@ -1,16 +1,22 @@
-const { UNSELECTED_POSITION, PLAYER_INDEX_1, PLAYER_INDEX_2 } = require('../../helpers/constants');
+const {
+    GAME_STATE,
+    UNSELECTED_POSITION,
+    PLAYER_INDEX_1,
+    PLAYER_INDEX_2
+} = require('../../helpers/constants');
+const tictactoe = require('./tictactoe');
 
 class Board {
     constructor(matchName, io) {
         this.matchName = matchName;
         this.io = io;
         this.gameBoardData = null;
+        this.currentTurn = null;
         this.playerCount = 0;
         this.players = {
             [PLAYER_INDEX_1]: null,
             [PLAYER_INDEX_2]: null
         };
-        this.currentTurn = null;
         this.resetGame();
     }
 
@@ -35,6 +41,7 @@ class Board {
     }
 
     resetGame() {
+        this.currentTurn = null;
         this.gameBoardData = Array(9).fill(UNSELECTED_POSITION);
     }
 
@@ -73,17 +80,26 @@ class Board {
 
             playerSocket.on('position marked', (currentGame) => {
                 this.gameBoardData = currentGame;
-                this.currentTurn = this.getNextTurn();
-                console.log('position marked:gameBoardData', this.gameBoardData);
-                console.log('position marked:currentTurn', this.currentTurn);
-                //playerSocket.broadcast.emit('position marked', this.gameBoardData);
-                /*playerSocket.to(this.matchName).emit('position marked', {
-                    gameBoardData: this.gameBoardData,
-                    currentTurn: this.currentTurn
-                });*/
-                this.io.to(this.matchName).emit('position marked', {
-                    gameBoardData: this.gameBoardData,
-                    currentTurn: this.currentTurn
+
+                tictactoe.positionMarked(this.gameBoardData, playerSocket.playerPlace)
+                .then((result) => {
+                    switch(result.state) {
+                        case GAME_STATE.IN_PROGRESS:
+                            this.currentTurn = this.getNextTurn();
+                            console.log('position marked:gameBoardData', this.gameBoardData);
+                            console.log('position marked:currentTurn', this.currentTurn);
+                            this.io.to(this.matchName).emit('position marked', {
+                                gameBoardData: this.gameBoardData,
+                                currentTurn: this.currentTurn
+                            });
+                        break;
+                        default:
+                            this.io.to(this.matchName).emit('game state', {
+                                ...result,
+                                ...{ gameBoardData: this.gameBoardData, currentTurn: this.currentTurn }
+                            });
+                            this.resetGame();
+                    }
                 });
             });
         } else {

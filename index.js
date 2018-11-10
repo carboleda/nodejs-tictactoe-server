@@ -32,17 +32,20 @@ io.on('connection', function (client) {
         console.log('playerSocket.playerPlace', client.playerPlace);
         if(client.matchName) {
             const match = ACTIVE_MATCHES[client.matchName];
-            match.playerCount--;
-            match.players[client.playerPlace] = null;
-            if(match.playerCount == 0) {
-                console.log('destroy match', client.matchName);
-                delete ACTIVE_MATCHES[client.matchName];
-            } else {
-                match.resetGame();
-                io.to(client.matchName).emit('position marked', {
-                    gameBoardData: match.gameBoardData
-                });
-                io.to(client.matchName).emit('waiting player', client.matchName);
+            if(match) {
+                match.playerCount--;
+                match.players[client.playerPlace] = null;
+                if(match.playerCount == 0) {
+                    console.log('destroy match', client.matchName);
+                    delete ACTIVE_MATCHES[client.matchName];
+                } else {
+                    match.resetGame();
+                    io.to(client.matchName).emit('game reset', {
+                        gameBoardData: match.gameBoardData,
+                        currentTurn: match.currentTurn,
+                    });
+                    io.to(client.matchName).emit('waiting player', client.matchName);
+                }
             }
         }
     });
