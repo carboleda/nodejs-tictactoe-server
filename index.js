@@ -8,7 +8,7 @@ const ACTIVE_MATCHES = {};
 
 io.on('connection', function (client) {
     client.on('new match', function ({ nickName }) {
-        const matchName = dockerNames.getRandomName();
+        const matchName = dockerNames.getRandomName().split('_').shift();
         const mMatch = new Match(matchName, io);
         client.nickName = nickName;
         client.matchName = matchName;
@@ -39,7 +39,10 @@ io.on('connection', function (client) {
                 delete ACTIVE_MATCHES[client.matchName];
             } else {
                 match.resetGame();
-                io.emit('position marked', match.gameBoard);
+                io.to(client.matchName).emit('position marked', {
+                    gameBoardData: match.gameBoardData
+                });
+                io.to(client.matchName).emit('waiting player', client.matchName);
             }
         }
     });
