@@ -29,13 +29,13 @@ io.on('connection', function (client) {
     });
 
     client.on('disconnect', () => {
-        console.log('playerSocket.playerPlace', client.playerPlace);
-        if(client.matchName) {
+        console.log('disconnect::playerSocket.playerPlace', client.playerPlace);
+        if (client.matchName) {
             const match = ACTIVE_MATCHES[client.matchName];
-            if(match) {
+            if (match) {
                 match.playerCount--;
                 match.players[client.playerPlace] = null;
-                if(match.playerCount == 0) {
+                if (match.playerCount == 0) {
                     console.log('destroy match', client.matchName);
                     delete ACTIVE_MATCHES[client.matchName];
                 } else {
@@ -51,6 +51,7 @@ io.on('connection', function (client) {
     });
 });
 
-server.listen(config.server.port, () => {
+const port = process.env.PORT || config.server.port;
+server.listen(port, () => {
     console.log(`Server is listen on port ${config.server.port}`);
 });
