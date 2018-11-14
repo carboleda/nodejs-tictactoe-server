@@ -142,6 +142,8 @@ function onPositionMarked(match, playerSocket, currentGame) {
     //Se invoca la funcion que aplica la logica del juego cada vez que se marca una posicion
     tictactoe.positionMarked(match.gameBoardData, playerSocket.playerPlace)
     .then((result) => {
+        //Se obtiene el siguiente turno
+        match.currentTurn = match.getNextTurn();
         const gameState = {
             gameBoardData: match.gameBoardData,
             currentTurn: match.currentTurn
@@ -150,8 +152,6 @@ function onPositionMarked(match, playerSocket, currentGame) {
         //Si despues de marcada una posicion el juego sigue estando en progreso
         switch(result.state) {
             case GAME_STATE.IN_PROGRESS:
-                //Se obtiene el siguiente turno
-                match.currentTurn = match.getNextTurn();
                 console.log('position marked:gameBoardData', match.gameBoardData);
                 console.log('position marked:currentTurn', match.currentTurn);
                 //Se notifica a los jugadores en la partida sobre la posición que fue marcada
