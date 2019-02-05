@@ -1,7 +1,7 @@
 const Boom = require('boom');
 const express = require('express');
 const router = express.Router();
-const database = require('../database');
+const database = require('../modules/database');
 
 router.get('/matches/:nickName', (req, res) => {
     database.getMatchesByNickName(req.params.nickName)
