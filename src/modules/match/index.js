@@ -6,6 +6,7 @@ const {
     PLAYER_INDEX_2
 } = require('../../helpers/constants');
 const tictactoe = require('./tictactoe');
+const database = require('../database');
 
 /**
  * Clase que implementa la logica de una partida de tictactoe
@@ -159,6 +160,11 @@ function onPositionMarked(match, playerSocket, currentGame) {
                 match.io.to(match.matchName).emit('position marked', gameState);
             break;
             default:
+                const opponentNickName = match.players[match.currentTurn].nickName;
+                database.saveMatchResult({
+                    ...result,
+                    ...{ nickName: playerSocket.nickName, boardSize: GAME_SIZE, opponentNickName }
+                });
                 //De lo contrario es porque el juego quedo empatado o finalizado,
                 //entonces se notifica a todos los jugadores en la partida
                 //el nuevo estado de la partida

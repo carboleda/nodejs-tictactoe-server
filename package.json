@@ -8,13 +8,19 @@
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
+        "start:dev": "nodemon index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "carboleda",
     "license": "ISC",
     "dependencies": {
+        "boom": "^7.2.2",
         "docker-names": "^1.1.1",
         "express": "^4.16.4",
+        "firebase-admin": "^6.1.0",
         "socket.io": "^2.1.1"
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.9"
     }
 }

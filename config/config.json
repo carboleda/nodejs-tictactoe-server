@@ -2,6 +2,13 @@
     "server": {
         "port": 3000
     },
+    "database": {
+        "serviceAccount": "test-1-600e1-931ca7783c50.json",
+        "collections": {
+            "gamers": "tictactoe-gamers",
+            "matches": "tictactoe-matches"
+        }
+    },
     "board": {
         "chars": {
             "top": "═", "top-mid": "╤", "top-left": "╔", "top-right": "╗"

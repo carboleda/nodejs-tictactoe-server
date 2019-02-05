@@ -6,6 +6,8 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const ACTIVE_MATCHES = {};
 
+app.use('/player', require('./src/modules/player'));
+
 io.on('connection', function (client) {
     client.on('new match', function ({ nickName }) {
         const matchName = dockerNames.getRandomName().split('_').shift();
