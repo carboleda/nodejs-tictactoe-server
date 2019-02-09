@@ -2,11 +2,7 @@ const dockerNames = require('docker-names');
 const Match = require('../modules/match');
 const ACTIVE_MATCHES = {};
 
-module.exports = {
-    setEvents
-};
-
-function setEvents(io) {
+module.exports = function(io) {
     io.on('connection', function (client) {
         client.on('new match', function ({ nickName }) {
             const matchName = dockerNames.getRandomName().split('_').shift();
